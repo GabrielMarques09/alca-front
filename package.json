@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "next",
+    "dev": "next --port 3005",
     "build": "next build",
     "start": "next start --port 3005"
   },
@@ -12,11 +12,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "date-fns": "^2.22.1",
     "formik": "^2.2.6",
     "next": "^10.0.3",
+    "pdfmake": "^0.2.2",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-icons": "^4.2.0",
+    "react-loading": "^2.0.3",
     "react-modal": "^3.12.1",
     "swr": "^0.5.4",
     "yup": "^0.32.9"

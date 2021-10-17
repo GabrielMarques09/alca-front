@@ -1,12 +1,27 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Menu from '../Menu';
 
+import Link from 'next/link';
+
 import { MdLabel, MdHome } from 'react-icons/md'
-import { AiOutlineInbox, AiOutlineMacCommand } from 'react-icons/ai'
+import { AiOutlineInbox, AiOutlineMacCommand, AiOutlineUsergroupAdd } from 'react-icons/ai'
+import { useQuery } from '../../lib/graphql';
+import Button from '../Button';
+
+const GET_ME = `
+    query {
+      panelGetMe {
+        id
+        name
+        email
+      }
+    }
+  `
 
 const Layout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const { data } = useQuery(GET_ME)
 
   const close = () => {
     setSidebarOpen(false)
@@ -15,6 +30,14 @@ const Layout = ({ children }) => {
   const open = () => {
     setSidebarOpen(true)
   }
+
+  const logout = () => {
+    localStorage.removeItem('accessToken')
+    localStorage.removeItem('refreshToken')
+    window.location = '/'
+  }
+
+
 
   return (
 
@@ -29,8 +52,8 @@ const Layout = ({ children }) => {
           </Menu.Brand>
 
           <Menu.Nav>
-            <Menu.Item href="/" icon={<MdHome size={24} />}>
-              Home
+            <Menu.Item href="/dashboard" icon={<MdHome size={24} />}>
+              Dashboard
             </Menu.Item>
             <Menu.Item href="/categories" icon={<MdLabel size={24} />}>
               Categorias
@@ -41,11 +64,14 @@ const Layout = ({ children }) => {
             <Menu.Item href="/brands" icon={<AiOutlineMacCommand size={24} />}>
               Marcas
             </Menu.Item>
+            <Menu.Item href="/users" icon={<AiOutlineUsergroupAdd size={24} />}>
+              Usuários
+            </Menu.Item>
 
           </Menu.Nav>
         </div>
         <div className="flex-1 flex flex-col overflow-hidden">
-          <header className="flex justify-between items-center py-4 px-6 bg-white border-b-4 border-indigo-600">
+          <header className="flex justify-between items-center py-4 px-6 bg-gray-200 border-b-4 border-green-400">
             <div className="flex items-center">
               <button onClick={open} className="text-gray-500 focus:outline-none lg:hidden">
                 <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -58,16 +84,11 @@ const Layout = ({ children }) => {
 
             <div className="flex items-center">
               <div x-data="{ notificationOpen: false }" className="relative">
-                <button click="notificationOpen = ! notificationOpen"
-                  className="flex mx-4 text-gray-600 focus:outline-none">
-                  <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                      d="M15 17H20L18.5951 15.5951C18.2141 15.2141 18 14.6973 18 14.1585V11C18 8.38757 16.3304 6.16509 14 5.34142V5C14 3.89543 13.1046 3 12 3C10.8954 3 10 3.89543 10 5V5.34142C7.66962 6.16509 6 8.38757 6 11V14.1585C6 14.6973 5.78595 15.2141 5.40493 15.5951L4 17H9M15 17V18C15 19.6569 13.6569 21 12 21C10.3431 21 9 19.6569 9 18V17M15 17H9"
-                      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    </path>
-                  </svg>
-                </button>
-
+                {data &&
+                  <div className="flex mr-2 text-green-400">
+                    Bem vindo: <p className="mx-2 font-bold cursor-default">{data.panelGetMe.name}</p>
+                  </div>
+                }
                 <div x-show="notificationOpen" click="notificationOpen = false"
                   className="fixed inset-0 h-full w-full z-10" style={{ display: "none" }}></div>
 
@@ -129,12 +150,16 @@ const Layout = ({ children }) => {
                 {dropdownOpen && <div
                   className={"absolute right-0 mt-2 w-48 bg-white rounded-md overflow-hidden shadow-xl z-10"}
                   style={{ display: dropdownOpen ? "block" : "" }}>
-                  <a href="#"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-600 hover:text-white">Profile</a>
-                  <a href="#"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-600 hover:text-white">Products</a>
-                  <a href="/login"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-600 hover:text-white">Logout</a>
+                  <Link href="/dashboard">
+                    <a
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-green-400 hover:text-white">Dashboard</a>
+                  </Link>
+                  <Link href="/products">
+                    <a
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-green-400 hover:text-white">Produtos</a>
+                  </Link>
+                  <a type='button' onClick={logout}
+                    className="cursor-pointer block px-4 py-2 text-sm text-gray-700 hover:bg-green-400 hover:text-white">Logout</a>
                 </div>
                 }
               </div>

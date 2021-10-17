@@ -15,7 +15,7 @@ let id = ''
 
 const UPDATE_CATEGORY = `
     mutation updateCategory($id: String!, $name: String!, $slug: String!) {
-      updateCategory (input: {
+      panelUpdateCategory (input: {
         id: $id,
         name: $name,
         slug: $slug

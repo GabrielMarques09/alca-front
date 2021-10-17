@@ -4,22 +4,30 @@ import Title from '../../components/Title'
 import Table from '../../components/Table'
 import { useMutation, useQuery } from '../../lib/graphql'
 import Link from 'next/link'
-import { MdDelete, MdEdit, MdWarning } from 'react-icons/md'
+import { MdDelete, MdEdit, MdWarning, MdBrokenImage } from 'react-icons/md'
 import Alert from '../../components/Alert'
 import Button from '../../components/Button'
 
 
 const DELETE_BRAND = `
   mutation deleteBrand($id: String!) {
-    deleteBrand (id: $id)
+    panelDeleteBrand (id: $id)
   }
 `
+
+const REMOVE_BRAND_LOGO = `
+  mutation removeBrandLogo($id: String!) {
+    panelRemoveBrandLogo (id: $id)
+  }
+`
+
 const GET_ALL_BRANDS = `
     query {
       getAllBrands {
         id
         name
         slug
+        logo
       }
     }
   `
@@ -28,8 +36,14 @@ const GET_ALL_BRANDS = `
 const Index = () => {
   const { data, mutate } = useQuery(GET_ALL_BRANDS)
   const [deleteData, deleteBrand] = useMutation(DELETE_BRAND)
+  const [removeBrandLogoData, deleteBrandLogo] = useMutation(REMOVE_BRAND_LOGO)
   const remove = id => async () => {
     await deleteBrand({ id })
+    mutate()
+  }
+
+  const removeBrandLogo = id => async () => {
+    await deleteBrandLogo({ id })
     mutate()
   }
   return (
@@ -50,6 +64,9 @@ const Index = () => {
               <Table>
                 <Table.Head>
                   <Table.Th>
+                    Logo
+                  </Table.Th>
+                  <Table.Th>
                     Marcas
                   </Table.Th>
                   <Table.Th></Table.Th>
@@ -59,6 +76,13 @@ const Index = () => {
                   {data && data.getAllBrands && data.getAllBrands.map(item => {
                     return (
                       <Table.Tr key={item.id}>
+                        <Table.Td>
+                          {item.logo && <img src={item.logo} alt={item.name} className="h-20 mb-4" />}
+                          {item.logo && <>
+                            <a href="#" title="Remover" className="border-2 border-red-500 rounded p-2 text-red-600 hover:text-red-900 flex-end ml-2" onClick={removeBrandLogo(item.id)}>Remover Imagem</a>
+                          </>
+                          }
+                        </Table.Td>
                         <Table.Td>
                           <div className="flex items-center">
                             <div>
@@ -70,13 +94,13 @@ const Index = () => {
                         <Table.Td>
                           <div className="flex">
                             <Link href={`/brands/${item.id}/upload`}>
-                              <a title="Upload Logo" className="text-green-600 hover:text-green-900 flex-end">Upload Logo</a>
+
+                              <a title="Upload Logo" className="text-blue-600 hover:text-green-900 flex-end"><MdBrokenImage /></a>
                             </Link>
                             <Link href={`/brands/${item.id}/edit`}>
-                              <a title="Editar" className="text-green-600 hover:text-green-900 flex-end"><MdEdit /></a>
+                              <a title="Editar" className="text-green-600 hover:text-green-900 flex-end ml-2"><MdEdit /></a>
                             </Link>
                             <a href="#" title="Remover" className="text-red-600 hover:text-red-900 flex-end ml-2" onClick={remove(item.id)}><MdDelete /></a>
-
                           </div>
 
                         </Table.Td>

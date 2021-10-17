@@ -16,7 +16,7 @@ let id = ''
 
 const UPDATE_PRODUCT = `
     mutation updateProduct($id: String!, $name: String!, $slug: String!, $description: String!, $category: String!) {
-      updateProduct (input: {
+      panelUpdateProduct (input: {
         id: $id,
         name: $name,
         slug: $slug,
@@ -102,7 +102,6 @@ const Edit = () => {
       const data = await updateProduct(product)
       if (data && !data.errors) {
         router.push('/products')
-        console.log(data)
       }
     },
     validationSchema: CategorySchema

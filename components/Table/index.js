@@ -3,7 +3,7 @@ import React from 'react'
 const Table = ({ children }) => {
   return (
     <table className="min-w-full">
-      { children}
+      {children}
     </table>
   )
 }

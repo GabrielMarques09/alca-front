@@ -13,16 +13,17 @@ import * as Yup from 'yup'
 
 let id = ''
 
-const UPDATE_BRAND = `
-    mutation updateBrand($id: String!, $name: String!, $slug: String!) {
-      panelUpdateBrand (input: {
+const UPDATE_USER = `
+    mutation updateUser($id: String!, $name: String!, $email: String!, $role: String!) {
+      panelUpdateUser (input: {
         id: $id,
         name: $name,
-        slug: $slug
+        email: $email,
+        role: $role
       }) {
         id
         name
-        slug
+        email
       }
     }
   `
@@ -32,74 +33,78 @@ const Edit = () => {
   id = router.query.id
   const { data } = useQuery(`
   query {
-    getBrandById(id: "${router.query.id}"){
+    panelGetUserById(id: "${router.query.id}"){
       id
       name
-      slug
+      email
+      role
     }
   }
   `)
 
-  const BrandSchema = Yup.object().shape({
+
+
+  const UserSchema = Yup.object().shape({
     name: Yup.string()
       .min(3, 'Por favor, informe pelo menos um nome com 3 caracteres')
-      .required('Por favor informe o nome da marca'),
-    slug: Yup.string()
-      .min(3, 'Por favor, informe pelo menos um slug para marca')
-      .required('Por favor informe um slug')
-      .test('is-unique', 'Por favor, utilize outro slug. Este já está em uso.', async (value) => {
+      .required('Por favor informe um nome'),
+    email: Yup.string().email()
+      .min(3, 'Email inválido')
+      .required('Por favor informe um email').test('is-unique', 'Por favor, utilize outro email. Este já está em uso por outro usuário.', async (value) => {
         const ret = await fetcher(JSON.stringify({
           query: `
-                query{
-                  getBrandBySlug(slug:"${value}"){
-                    id
-                  }
+              query{
+                panelGetUserByEmail(email:"${value}"){
+                  id
                 }
-              `
+              }
+            `
         }))
         if (ret.errors) {
           return true
         }
-        if (ret.data.getBrandBySlug.id === id) {
+        if (ret.data.panelGetUserByEmail.id == id) {
           return true
         }
         return false
-      }),
+      })
   })
 
 
-  const [updatedData, updateBrand] = useMutation(UPDATE_BRAND)
+  const [updatedData, updateUser] = useMutation(UPDATE_USER)
 
   const form = useFormik({
     initialValues: {
       name: '',
-      slug: ''
+      email: '',
+      role: ''
     },
     onSubmit: async values => {
-      const brand = {
+      const user = {
         ...values,
         id: router.query.id
       }
-      const data = await updateBrand(brand)
+      const data = await updateUser(user)
       if (data && !data.errors) {
-        router.push('/brands')
+        router.push('/users')
       }
     },
-    validationSchema: BrandSchema
+    validationSchema: UserSchema
   })
 
   useEffect(() => {
-    if (data && data.getBrandById) {
-      form.setFieldValue('name', data.getBrandById.name)
-      form.setFieldValue('slug', data.getBrandById.slug)
+    if (data && data.panelGetUserById) {
+      form.setFieldValue('name', data.panelGetUserById.name)
+      form.setFieldValue('email', data.panelGetUserById.email)
+      form.setFieldValue('role', data.panelGetUserById.role)
     }
   }, [data])
   return (
     <Layout>
-      <Title title="Editar marca" />
+      <Title title="Editar usuário" />
       <div className="flex flex-col mt-8">
         <div className="mb-5">
-          <Button.Outline href="/brands">
+          <Button.Outline href="/users">
             Voltar
           </Button.Outline>
         </div>
@@ -109,10 +114,11 @@ const Edit = () => {
           }
           <div className="align-middle inline-block min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200">
             <form onSubmit={form.handleSubmit}>
-              <div class="md:w-1/2 px-3">
-                <Input label="Nome da marca" onChange={form.handleChange} value={form.values.name} name="name" errorMessage={form.errors.name} />
-                <Input label="Descrição" onChange={form.handleChange} value={form.values.slug} name="slug" errorMessage={form.errors.slug} />
-                <Button type="submit">Editar marca</Button>
+              <div className="md:w-1/2 px-3">
+                <Input label="Nome" onChange={form.handleChange} value={form.values.name} name="name" errorMessage={form.errors.name} />
+                <Input label="Email" placeholder="joao@email.com" onChange={form.handleChange} value={form.values.email} name="email" errorMessage={form.errors.email} />
+                <Input label="Role" placeholder="Preencha com o role" onChange={form.handleChange} value={form.values.role} name="role" errorMessage={form.errors.role} />
+                <Button type="submit">Editar usuário</Button>
               </div>
             </form>
           </div>

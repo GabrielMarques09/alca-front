@@ -12,7 +12,7 @@ let id = ''
 
 const UPLOAD_BRAND_LOGO = `
     mutation uploadBrandLogo($id: String!, $file: Upload!) {
-      uploadBrandLogo (
+      panelUploadBrandLogo (
         id: $id,
         file: $file
       )
@@ -42,7 +42,6 @@ const Upload = () => {
         ...values,
         id: router.query.id
       }
-      console.log(brand)
       const data = await updateBrand(brand)
       if (data && !data.errors) {
         router.push('/brands')
